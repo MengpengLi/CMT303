@@ -2,6 +2,11 @@ import sys
 from Tkinter import *
 import tkMessageBox
 import tkFont
+from test import *
+from Questionnaire import *
+from viewResult import *
+import csv
+import os
 
 #---COMMON FUNCTIONS AND VARIABLES---
 
@@ -67,6 +72,7 @@ class WelcomePage:
         #Student Details Entry
         self.DetailsLabel = Label(self.master,text="Please enter your details below and click enter to begin the app. Alternatively, \nif you wish to remain anonymous, you can leave these fields blank.",bg=BackCol,fg=TextCol,font=NormalFont, justify="left")
         self.DetailsLabel.place(x=400,y=200)
+
 
         self.UserFirstName = StringVar()
         self.UserSurname = StringVar()
@@ -141,14 +147,17 @@ class WelcomePage:
         #Local Function to Progress to Home Page
         def NextPage(self):
             root2 = Toplevel(self.master)
-            StudentFirstName = self.UserFirstNameEntry.get()
-            StudentSurname = self.UserSurnameEntry.get()
-            StudentEmail = self.UserEmailEntry.get()
-            StudentTel = self.UserTelEntry.get()
-            print(StudentFirstName)
-            print(StudentSurname)
-            print(StudentEmail)
-            print(StudentTel)
+            self.StudentDetail = []
+            self.StudentDetail.append(self.UserFirstNameEntry.get())
+            self.StudentDetail.append(self.UserSurnameEntry.get())
+            self.StudentDetail.append(self.UserEmailEntry.get())
+            self.StudentDetail.append(self.UserTelEntry.get())
+            for directory, subdirectories, files in os.walk("./students"):
+                ID = len(files) + 1
+                name ="./students/" + "c" + str(ID) + ".csv"
+                with open(name, 'wb') as csvfile:
+                    writer = csv.writer(csvfile,delimiter='|')
+                    writer.writerow(self.StudentDetail)
             root2.geometry('%dx%d+%d+%d' % (600, 300, x, y))
             goto = MainNav(root2)
 
@@ -180,6 +189,7 @@ class MainNav:
         self.TestTitle.place(x= 400, y = 200)
         self.TestDescript = Label(self.master2, text = "Select this to begin the Logic and Reasoning test. There will be a few \npractice questions to get you used to the format and question types. ",bg=BackCol,fg=TextCol, font=NormalFont, justify ="left")
         self.TestDescript.place(x= 400, y = 230)
+        self.TestButton ['command'] = self.OpenTest
 
         #Questionnaire Button and Labels
         self.QuestionButton = Button(self.master2,text = "C",  bg="#16A79D", fg = TextCol, font = "Ariel 40 bold")
@@ -188,6 +198,7 @@ class MainNav:
         self.QuestionTitle.place(x= 400, y=300)
         self.QuestionDescript = Label(self.master2, text = "Select this to begin the Course Selection Questionnaire. \nThis ask you a series of questions to help identify which course is right for you.",bg=BackCol,fg=TextCol, font=NormalFont, justify ="left")
         self.QuestionDescript.place(x= 400, y= 330)
+        self.QuestionButton['command'] = self.openQuestion
 
         #Results Button and Labels
         self.ResultsButton = Button(self.master2,text = "R",  bg="#16A79D", fg = TextCol, font = "Ariel 40 bold")
@@ -196,10 +207,31 @@ class MainNav:
         self.ResultsTitle.place(x= 400, y=400)
         self.ResultsDescript = Label(self.master2, text = "Select this to view the results for your progress so far",bg=BackCol,fg=TextCol, font=NormalFont, justify ="left")
         self.ResultsDescript.place(x= 400, y=430)
+        self.ResultsButton ['command'] = self.view
 
         #Quit Button
         self.QuitButton = Button(self.master2,text ="QUIT", command=lambda: Quitting(self.master2, "Quit Session", "Are you sure you want to Quit this Session?"), bg="#CF4858", fg = TextCol)
         self.QuitButton.place(x=1100,y=30)
+
+    def OpenTest(self):
+        master = Toplevel(self.master2)
+        self.cmtTest = test(master)
+        self.cmtTest.streamer()
+        self.cmtTest.display()
+        self.cmtTest.Next()
+        self.cmtTest.prev()
+        self.cmtTest.submitButton()
+
+    def openQuestion(self):
+        master = Toplevel(self.master2)
+        self.question = Questionnaire(master)
+
+    def view(self):
+        master = Toplevel(self.master2)
+        self.viewResult = viewResult(master)
+        self.viewResult.StudentReadFile()
+        self.viewResult.StudentDisplay()
+
 
 #----ADMIN CONSOLE----
 
@@ -228,6 +260,10 @@ class AdminConsole:
         self.TestDescript = Label(self.master3, text = "Select this if you wish to change any aspects of the Logic Test.",bg=BackCol,fg=TextCol, font=NormalFont, justify ="left")
         self.TestDescript.place(x= 400, y = 230)
 
+        self.TestButton ['command'] = self.manageTest
+
+
+
         #Questionnaire Button and Labels
         self.QuestionButton = Button(self.master3,text = "C", bg="#16A79D", fg = TextCol, font = "Ariel 40 bold")
         self.QuestionButton.place(x= 300, y=300)
@@ -235,6 +271,8 @@ class AdminConsole:
         self.QuestionTitle.place(x= 400, y=300)
         self.QuestionDescript = Label(self.master3, text = "Select this if you wish to adjust the questionnaire.",bg=BackCol,fg=TextCol, font=NormalFont, justify ="left")
         self.QuestionDescript.place(x= 400, y= 330)
+
+        self.QuestionButton ['command'] = self.manageQues
 
         #Results Button and Labels
         self.ResultsButton = Button(self.master3,text = "R",  bg="#16A79D", fg = TextCol, font = "Ariel 40 bold")
@@ -244,11 +282,30 @@ class AdminConsole:
         self.ResultsDescript = Label(self.master3, text = "Select this to view results for all students who have \ntaken the test so far.S",bg=BackCol,fg=TextCol, font=NormalFont, justify ="left")
         self.ResultsDescript.place(x= 400, y=430)
 
+        self.ResultsButton ['command'] = self.showDetails
 
 
         #Quit Button
         self.QuitButton = Button(self.master3,text ="QUIT", command=lambda: Quitting(self.master3, "Quit Console", "Are you sure you want to Return to the Welcome Screen?"), bg="#CF4858", fg = TextCol)
         self.QuitButton.place(x=1100,y=30)
+
+    def manageTest(self):
+        master = Toplevel(self.master3)
+        self.cmtTest = test(master)
+        self.cmtTest.streamer()
+        self.cmtTest.manageTest()
+
+    def manageQues(self):
+        master = Toplevel(self.master3)
+        self.Questionnarie = Questionnaire(master)
+        self.Questionnarie.manageQuestionnaire()
+
+    def showDetails(self):
+        master = Toplevel(self.master3)
+        self.details = viewResult(master)
+        self.details.adminEntry()
+        self.details.staffDisplay()
+
 
 
 #Defining the Root
