@@ -9,6 +9,7 @@ class cmtQuestions:
         self.question = question
         self.options = []
         self.id = id
+        self.finaloptions = []
 
     def addOptions(self,option):
         self.options.append(option)
@@ -33,12 +34,12 @@ class cmtQuestions:
         temp = []
         temp = self.options
         text = self.question
-        options = []
-        for i in range(len(temp)-1,-1,-1):
-            tmp = random.randint(0,i)
-            options.append(temp[tmp])
-            del temp[tmp]
-        return text,options
+        if(len(self.finaloptions) == 0):
+            for i in range(len(temp)-1,-1,-1):
+                tmp = random.randint(0,i)
+                self.finaloptions.append(temp[tmp])
+                del temp[tmp]
+        return text,self.finaloptions
 
 if __name__ == "__main__":
     Q1 = cmtQuestions("Q1")

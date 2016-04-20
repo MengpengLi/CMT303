@@ -1,0 +1,8 @@
+Was your undergraduate degree, or have you ever studied a further education course in Computer Science?|2|1|3,5,6|1,2
+Was your first degree in a numerate subject such as Mathematics, Operational Research, Statistics, Computer Science, Management & Economics or Engineering?|2|3|9|4
+Are you interested in using computer science to perform analysis on large data sets?|7|4|1,2|4
+Are you interested in using computer science to perform analysis on large data sets?|5|6|5,6|3,4
+Are you interested in pursuing computer science with a particular focus on information and cyber security?|7|7|1|2
+Is using computer science skills in a journalistic capacity, for example to discover new stories or information, something you wish to do in future?|7|7|4|3
+Are you interested in learning more abourt computer science in order to pursue a career in management?|7|7|5|6
+We recommend you apply for the following course:

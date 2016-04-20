@@ -28,10 +28,18 @@ StudentTel = None
 #Exit Warning Box
 
 def Quitting(CurrentWindow, title, message):
-    myExit = tkMessageBox.askyesno(title, message)
-    if myExit > 0:
+    #myExit = tkMessageBox.askyesno(title, message)
+    if tkMessageBox.askyesno(title, message,parent = CurrentWindow):
         CurrentWindow.destroy()
-        return
+        roooot = Tk()
+        ww = roooot.winfo_screenwidth()
+        hh = roooot.winfo_screenheight()
+        xx = (ww/2) - 600
+        yy = (hh/2) - 300
+        roooot.geometry('%dx%d+%d+%d' % (600, 300, xx, yy))
+
+        WelcomePage(roooot)
+        #return
 # Alert Box
 
 def Alert(CurrentWindow, title, message):
@@ -56,7 +64,7 @@ class WelcomePage:
         #Adding Cardiff Uni Logo using canvas
         self.canvas = Canvas(width = 300, height = 300, bg = BackCol)
         self.canvas.pack()
-        self.Logo = PhotoImage(file = "")#r'/Users/Angrybirdy/PycharmProjects/cmt303/CardiffRecolour.png')
+        self.Logo = PhotoImage(file = "CardiffRecolour.png")
         self.resizeLogo = self.Logo.subsample(5,5)
         self.canvas.create_image(100, 100, image = self.resizeLogo, anchor = CENTER)
         self.canvas.place(x=260, y=230, anchor=CENTER)
@@ -101,8 +109,14 @@ class WelcomePage:
         self.UserTelEntry.place(x = 580, y = 390)
 
         #Quit Button
-        self.QuitButton = Button(self.master,text ="QUIT", command=lambda: Quitting(self.master, "Quit","Are you sure you want to Quit?" ), bg="#CF4858", fg = TextCol)
+        self.QuitButton = Button(self.master,text ="QUIT", command=lambda: Quitting2(self,"Are you sure you want to Quit?" ), bg="#CF4858", fg = TextCol)
         self.QuitButton.place(x=1100,y=30)
+
+        def Quitting2(self, Text):
+            myExit = tkMessageBox.askyesno('Quit',Text)
+            if myExit:
+                self.master.destroy()
+            
 
         #Enter Button
         self.StartButton = Button(self.master,text = "ENTER", command = lambda: NextPage(self), bg="#16A79D", fg = TextCol, font = "Ariel 20 bold")
@@ -139,14 +153,16 @@ class WelcomePage:
         #Local Function to go to Admin Console
         def ToAdmin(self):
             if self.SubmittedUsername.get() == "admin" and self.SubmittedPassword.get() == "password":
-                root3 = Toplevel(self.master)
+                root3 = Tk()
                 root3.geometry('%dx%d+%d+%d' % (600, 300, x, y))
                 goto = AdminConsole(root3)
+                self.master.destroy()
             else: Alert(self, "Invalid Details", "Username or Password Incorrect")
 
         #Local Function to Progress to Home Page
         def NextPage(self):
-            root2 = Toplevel(self.master)
+           # root2 = Toplevel(self.master)
+            root2 = Tk()
             self.StudentDetail = []
             self.StudentDetail.append(self.UserFirstNameEntry.get())
             self.StudentDetail.append(self.UserSurnameEntry.get())
@@ -160,6 +176,7 @@ class WelcomePage:
                     writer.writerow(self.StudentDetail)
             root2.geometry('%dx%d+%d+%d' % (600, 300, x, y))
             goto = MainNav(root2)
+            self.master.destroy()
 
 
 #----MAIN NAVIGATION PAGE----
@@ -214,23 +231,50 @@ class MainNav:
         self.QuitButton.place(x=1100,y=30)
 
     def OpenTest(self):
-        master = Toplevel(self.master2)
+        #master = Toplevel(self.master2)
+        self.master2.destroy()
+        master = Tk()
         self.cmtTest = test(master)
         self.cmtTest.streamer()
         self.cmtTest.display()
         self.cmtTest.Next()
         self.cmtTest.prev()
         self.cmtTest.submitButton()
+        temp = Tk()
+        ww = temp.winfo_screenwidth()
+        hh = temp.winfo_screenheight()
+        xx = (ww/2) - 600
+        yy = (hh/2) - 300
+        temp.geometry('%dx%d+%d+%d' % (600, 300, xx, yy))
+        self.__init__(temp)
+        
+        
+            
 
     def openQuestion(self):
-        master = Toplevel(self.master2)
+        #master = Toplevel(self.master2)
+        self.master2.destroy()
+        master = Tk()
         self.question = Questionnaire(master)
+        temp = Tk()
+        ww = temp.winfo_screenwidth()
+        hh = temp.winfo_screenheight()
+        xx = (ww/2) - 600
+        yy = (hh/2) - 300
+        temp.geometry('%dx%d+%d+%d' % (600, 300, xx, yy))
+        self.__init__(temp)
 
     def view(self):
         master = Toplevel(self.master2)
         self.viewResult = viewResult(master)
         self.viewResult.StudentReadFile()
         self.viewResult.StudentDisplay()
+
+        self.ws = root.winfo_screenwidth()
+        self.hs = root.winfo_screenheight()
+        self.x = (ws/2) - 600
+        self.y = (hs/2) - 300
+        self.root.geometry('%dx%d+%d+%d' % (600, 300, x, y))
 
 
 #----ADMIN CONSOLE----
@@ -290,21 +334,26 @@ class AdminConsole:
         self.QuitButton.place(x=1100,y=30)
 
     def manageTest(self):
-        master = Toplevel(self.master3)
+        master = Tk()
         self.cmtTest = test(master)
         self.cmtTest.streamer()
         self.cmtTest.manageTest()
 
     def manageQues(self):
-        master = Toplevel(self.master3)
-        self.Questionnarie = Questionnaire(master)
+        self.Questionnarie = Questionnaire(Tk())
         self.Questionnarie.manageQuestionnaire()
 
     def showDetails(self):
-        master = Toplevel(self.master3)
-        self.details = viewResult(master)
+        #master = Toplevel(self.master3)
+        self.details = viewResult(Tk())
         self.details.adminEntry()
         self.details.staffDisplay()
+        
+        self.ws = root.winfo_screenwidth()
+        self.hs = root.winfo_screenheight()
+        self.x = (ws/2) - 600
+        self.y = (hs/2) - 300
+        self.root.geometry('%dx%d+%d+%d' % (600, 300, x, y))
 
 
 

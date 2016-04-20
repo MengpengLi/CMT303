@@ -3,11 +3,22 @@ import tkMessageBox
 import random
 import csv
 import os
+import re
+
+
+
+TitleFont = ("Ariel 30 bold")
+
+NormalFont = ("Ariel 13")
+
+BackCol = ("#4D505B")
+
+TextCol = ("#FFFFFF")
 
 courses_file = open("courses.csv", "r")
 read_courses = courses_file.read()
 courses_file.close()
-split_courses = read_courses.split('\r')
+split_courses = re.split("\r|\n|\r\n", read_courses)
 course_list = []
 for i in range(len(split_courses)):
 	course = split_courses[i].split(',')
@@ -16,17 +27,20 @@ courses = {}
 for item in course_list:
 	courses[int(item[0])] = item[1]	
 
-# Reading questionnaire.csv and formatting as list to be read by createNewQuestion methods
+# Reading questionnaire.txt and formatting as list to be read by createNewQuestion methods
 questionText = []
-csv_file = open("questionnaire.csv", "r")
+csv_file = open("questionnaire.txt", "r")
 whole_csv = csv_file.read()
-csv_file.close()   
-split_csv = whole_csv.split('\r') 
+csv_file.close()
+split_csv = re.split("\r|\n|\r\n", whole_csv)
+print(split_csv)
+
 # may need to inc '\n' too for other op.systems
 question_rows = []
 for i in range(len(split_csv)):
  	question_split = split_csv[i].split("|")
 	question_rows.append(question_split)
+print(question_rows)	
 for i in range(len(question_rows)):
 	questionText.append([])
 	questionText[i].append(question_rows[i][0])
@@ -50,38 +64,59 @@ class Questionnaire(Frame):
 # Initialise Questionnaire Class
 
 		Frame.__init__(self, master)
-		self.grid()
+		self.ws = self.master.winfo_screenwidth()
+                self.hs = self.master.winfo_screenheight()
+                self.x = (self.ws/2) - 600
+                self.y = (self.hs/2) - 300
+                self.master.geometry('%dx%d+%d+%d' % (600, 300, self.x, self.y))
+                self.master.geometry('{}x{}'.format(1200, 600))
+                self.master.configure(background='#4D505B')
+		#self.grid()
+		#self.text1 = Label(self,height=3, padx=80, pady=80, wraplength=600, background=BackCol, font = NormalFont, fg = TextCol)    
+		self.pack(fill=BOTH, expand=1)
+                self.configure(background='#4D505B')
 		self.createTeamExpQuest(0)
-		self.createButtons()
-		#self.createManageButton()
 
-
-    def createTeamExpQuest (self, quesionNo):
-		lblProg = Label(self, text=questionText[quesionNo][0], height=3, anchor=W, font=('MS', 22), padx=50, pady=30, wraplength=600, background='#CF4858')    
-		# Label(master, text=longtext, anchor=W, justify=LEFT)  
-		lblProg.grid(row=1, column=4, columnspan=5, rowspan=3, padx=260, pady=100)
-
-		# THIS CONFIG APPROACH SHOULD WORK TO HIDE EXCESS TEXT????????
-		# textvariable=
-
-
-    def createButtons(self):
-		butYes = Button(self, text='YES',font=('MS', 24,'bold'), bd=0, padx=60, pady=30)
+                global butYes
+		butYes = Button(self, text='YES',bg="#16A79D", fg = TextCol, font = "Ariel 25 bold")
 		butYes['command']=self.createNewQuestionA     #Note: no () after the method
-		butYes.grid(row=5, column=5, columnspan=2)	
-
-		butNo = Button(self, text='NO',font=('MS', 24,'bold'), background='green', padx=60, pady=30, highlightthickness=0)
+		#butYes.grid(row=5, column=5, columnspan=2)	
+                butYes.pack()
+                butYes.place(x=900, y=220)
+                
+                        
+                global butNo
+		butNo = Button(self, text='NO',bg="#80628B", fg = TextCol, font = "Ariel 25 bold",padx=20)
 		butNo['command']=self.createNewQuestionB      #Note: no () after the method
-		butNo.grid(row=5, column=6, columnspan=2)	
-
+		#butNo.grid(row=5, column=6, columnspan=2)	
+                butNo.pack()
+                butNo.place(x=900, y=290)
+                self.QuitButton = Button(self,text ="QUIT", command=lambda: Quitting2(self,"Are you sure you want to Quit?" ), bg="#CF4858", fg = TextCol)
+                self.QuitButton.place(x=1100,y=30)
+                def Quitting2(self, Text):
+                    myExit = tkMessageBox.askyesno('Quit',Text)
+                    if myExit:
+                        self.master.destroy()
 		
+	
+
+
+        #display the question on the screen
+    def createTeamExpQuest (self, quesionNo):
+		lblProg = Label(self, text=questionText[quesionNo][0], height=3, padx=95, pady=80, wraplength=600, background=BackCol, font = "Ariel 17", fg = TextCol, justify="left")    
+                lblProg.pack()
+                lblProg.place(x=100, y=150)
+
+                
+	#construct manage button
     def createManageButton(self):
 		# if (loggedIn):	
-		butManageQs = Button(self, text='Manage Questions',font=('MS', 15,'bold'), background='green', padx=10, pady=10, highlightthickness=0)
+		butManageQs = Button(self, text='Manage Questions',font=('MS', 15,'bold'), background='green', padx=20, pady=10, highlightthickness=0)
 		butManageQs['command']=self.manageQuestionnaire      #Note: no () after the method
 		butManageQs.grid(row=1, column=5, columnspan=3)
 
 
+        #close current window and record the recommanded course alongside with the student info
     def displayCourseInfo(self, courses):
         print courses.values()
         self.master.destroy()
@@ -93,13 +128,18 @@ class Questionnaire(Frame):
                         writer.writerow([str(courses.values())])
 
 
-
+        #display the recommanded course for the current student
     def createCourseLink(self, courses):
 		for key in courses:
-			butCourse = Button(self, text=courses[key],font=('MS', 44,'bold'), background='blue', padx=80, pady=40)
+			butCourse = Button(self, text=courses[key],bg="#16A79D", fg = TextCol, font = "Ariel 20 bold")
 			butCourse['command']=lambda :self.displayCourseInfo(courses)     #Note: no () after the method
-			butCourse.grid(row=5, column=4, columnspan=5, rowspan=4)
-
+			butCourse.pack()
+			butCourse.place(x= 350, y=350)
+			butYes.destroy()
+			butNo.destroy()
+			
+                        			
+        #cache the next question if 'yes' button is pressed
 
     def createNewQuestionA(self):
 		eliminate = questionText[questionNo][3]
@@ -111,7 +151,8 @@ class Questionnaire(Frame):
 		self.createTeamExpQuest(questionNo)
 		if (nextQ == 7):
 			self.createCourseLink(courses)	
-		
+
+	#cache the next question if 'no' is pressed
     def createNewQuestionB(self):
 		eliminate = questionText[questionNo][4]
 		for i in eliminate:
@@ -123,72 +164,63 @@ class Questionnaire(Frame):
 		if (nextQ == 7):
 			self.createCourseLink(courses)
 
+        #display the edit guidence and current question list 
     def manageQuestionnaire(self):
-			editGuide = Text(self, height=10, font=('MS', 14, "bold"), background='#CF4858', padx=20, pady=20)
-			editGuide.grid(row=1, column=1, columnspan=10, rowspan=2, padx=100, pady=(10,0))
-			editGuide.insert("1.0", "Edit the Questionnaire below. 	All but the last Question should contain the following 5 sections seperated by '|'. The final question should only include text introducing the selected course.\n1: The Question text \n2&3: A single digit for the next question (starting at 0) on answering Yes/No respectively.\n4&5: Digit(s) (seperated by commas) relating to which course(s) can be eliminated from the list below on ansering Yes/No respectively.\n\n")
-			editGuide.insert("7.0", courses)
-			editGuide.config(state=DISABLED)
-			editScreen = Text(self, height=16, font=('MS', 14), fg='white', background='#CF4858', padx=20, pady=20)
-			editScreen.grid(row=3, column=1, columnspan=8, rowspan=10, padx=100)
-			x = 1
-			for i in range(len(whole_csv)):
-					editScreen.insert((str(x)+".0"), whole_csv[i])
-					global x
-					x+=1	
-			butSaveQs = Button(self, text='Save',font=('MS', 15,'bold'), highlightthickness=0, padx=10, pady=5, command=lambda: self.saveQuestionnaire(editScreen.get("1.0",'end-1c')))     
-	 		butSaveQs.grid(row=12, column=8, columnspan=2)	
-			
-    def saveQuestionnaire(self, input):
-			verifying = input.splitlines()
-			okSave = True
-			for i in range(len(verifying)-1):
-				sections = verifying[i].split('|')
-				# code below verifies requirements outlined in editGuide Textbox are met
-				if len(sections) == 5 and len(sections[1]) == 1 and sections[1].isdigit() and len(sections[2]) == 1 and sections[2].isdigit() and (y.isdigit() for y in range(len(sections[3].split(',')))) and (z.isdigit() for z in range(len(sections[4].split(',')))):	
-					continue				
-				else:
-					tkMessageBox.showerror("Update Error", "Your changes don't comply with the format required.\n\nPlease check your updates and try again.")	
-					okSave = False
-			if (okSave):		
-				new_file = open("questionnaire.csv", "w+")
-				new_file.write(input)
-				new_file.close()	
-				tkMessageBox.showerror("Saved Successfully", "Your changes have successfully been recorded")	
-				self.manageQuestionnaire	
-			i = 1
-			while i < 40:
-				print("{}/40".format(i))
-				self.simulateQuestionnaire(input, 0)
-				i += 1
+                butYes.destroy()
+		butNo.destroy()
+		
+		editGuide = Text(self, height=10, background=BackCol, font = "Ariel 12", fg = TextCol,padx = 10, pady=20)
+		editGuide.place(x=190, y=100)
+		#editGuide.grid(row=1, column=3, columnspan=10, rowspan=2, padx=100, pady=(10,0))
+		editGuide.insert("1.0", "Edit the Questionnaire below. 	All but the last Question should contain the following 5 sections seperated by '|'. The final question should only include text introducing the selected course.\n1: The Question text \n2&3: A single digit for the next question (starting at 0) on answering Yes/No respectively.\n4&5: Digit(s) (seperated by commas) relating to which course(s) can be eliminated from the list below on ansering Yes/No respectively.\n\n")
+		editGuide.insert("7.0", courses)
+		editGuide.config(state=DISABLED) # guide not editable
+		editScreen = Text(self, height=10, background="#6a6e7c", font = "Ariel 12", fg = TextCol, padx = 10, pady=20)
+		#editScreen.grid(row=3, column=3, columnspan=8, rowspan=10, padx=100)
+		editScreen.place(x=190, y=320)
+		new_csv_file = open("questionnaire.txt", "r")
+		w_whole_csv = new_csv_file.read()
+		print(w_whole_csv)
+		new_whole_csv = re.split("\n|\r|\r\n", w_whole_csv)
+		print(new_whole_csv)
+		print(len(new_whole_csv))
+                x = 1
+		for i in range(len(new_whole_csv)-1):
+                        editScreen.insert((str(x)+".0"), ((new_whole_csv[i])+"\n"))
+			global x
+			x+=1
+			print(x)
+		editScreen.insert((str(x)+".0"), ((new_whole_csv[-1])))	
+		butSaveQs = Button(self, text='Save',bg="#16A79D", fg = TextCol, font = "Ariel 25 bold", highlightthickness=0, padx=10, pady=5, command=lambda: self.saveQuestionnaire(editScreen.get("1.0",'end-1c')))     
+	 	#butSaveQs.grid(row=12, column=8, columnspan=2)
+		butSaveQs.pack()
 
-    def simulateQuestionnaire(self, input, number):
+	#check if the input new question list is in a valid format. if yes , save the new list. if no, warn the user
+    def saveQuestionnaire(self, input):
 		verifying = input.splitlines()
-		i=1
-		print("RUNNING METHOD FOR Q NO: {}".format(number))
-		print("INPUT Split Length = {}".format(len(verifying)))
-		if number == (len(verifying)-1):
-			print("GOT TO FINAL QUESTION")
-		elif number > (len(verifying)-1):				
-			print("One of the questions ({}) is pointing to a question that doesn't exist. SEE Qno v Length".format(number))
-		else:	
-			while i < 10:
-				if number < (len(verifying)-1):
-					print("{}/10".format(i))
-					nextQ = verifying[number].split('|')
-					self.simulateQuestionnaire(input, nextQ[(random.randint(1,2))])
-				else:
-					print("Stuck getting to Question number: {}".format(number))
-					break	
-				i+=1				
-# Main
-#root = Tk()
-#root.resizable(width=FALSE, height=FALSE)
-#root.configure(background='#4D505B')
-#root.geometry('{}x{}'.format(1200, 600))
-#root.title("Questionnaire")
-#app = Questionnaire(root)
-#app.configure(background='#4D505B')
-#root.mainloop()
+		print(verifying)
+		okSave = True
+		for i in range(len(verifying)-2):
+                        sections = verifying[i].split('|')
+                        print(sections)
+                        print(len(sections))
+			# code below verifies requirements outlined in editGuide Textbox are met
+                        if len(sections) == 5 and len(sections[1]) == 1 and sections[1].isdigit() and len(sections[2]) == 1 and sections[2].isdigit() and (y.isdigit() for y in range(len(sections[3].split(',')))) and (z.isdigit() for z in range(len(sections[4].split(',')))):	
+                                a = 1
+                                print("PASSED: {}".format(verifying[i]))
+                                print(len(verifying))
+                        else:
+                                print ("FAILED: {}".format(verifying[i]))
+                                tkMessageBox.showerror("Update Error", "Your changes don't comply with the format required.\n\nPlease check your updates and try again.",parent = self.master)	
+                                okSave = False
+                                break
+		if (okSave):		
+			new_file = open("questionnaire.txt", "w+")
+			new_file.write(input)
+			new_file.close()	
+			tkMessageBox.showerror("Saved Successfully", "Your changes have successfully been recorded")	
+			self.manageQuestionnaire
+			self.master.destroy()
+
 
 
